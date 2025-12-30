@@ -4,77 +4,68 @@ import {
   Play,
   Shield,
   Sparkles,
+  Handshake,
   Crown,
   Film,
   ArrowRight,
   Mail,
+  Phone,
+  Lock,
   ExternalLink,
   Quote,
-  Check,
-  Ticket,
-  LogIn,
-  User,
 } from "lucide-react";
 
-// ------------------------------------------------------------
-// THE UPGRADE SOCIETY — Single-file website (React)
+// ---------------------------------------------
+// THE STANDARD — Single-file website (React)
 // - Tailwind CSS assumed available
 // - Hash-based routing (no deps)
-// - YouTube integration: hero sizzle + 6 testimonial embeds
-// - Black + gold design language
-// ------------------------------------------------------------
+// - YouTube integration via playlist + individual embeds
+// ---------------------------------------------
 
 const BRAND = {
-  name: "THE UPGRADE SOCIETY",
-  subtitle: "Ultimate Masterclass",
-  tagline: "5-star living. 3-star budget.",
-  presenter: "KRIS BUBAN",
-  role: "Luxury Lifestyle Strategist & Educator",
-  email: "support@theupgradesociety.com",
+  name: "THE STANDARD",
+  subtitle: "A Rolls‑Royce Life",
+  tagline: "Excellence is the standard. Everything else is optional.",
+  contactEmail: "Partnerships@TheStandardSeries.com",
+  contactPhone: "(240) 946‑0774",
 };
 
-// Put these files in /public (Vite) or your host's public folder.
-const ASSETS = {
-  logoSrc: "/upgrade-society-logo.png",
-  aboutPhotoSrc: "/kris.jpg",
-};
-
-// Replace with your actual YouTube IDs
+// Replace with your actual YouTube playlist ID + featured video IDs
 const YT = {
-  heroVideoId: "dQw4w9WgXcQ",
-  testimonials: [
-    { id: "M7lc1UVf-VE", name: "Marcus T.", note: "Ritz suite for $127" },
-    { id: "ysz5S6PUM-U", name: "Jennifer K.", note: "Status stacking + luxury rentals" },
-    { id: "ScMzIvxBSi4", name: "David R.", note: "Business credit breakthrough" },
-    { id: "aqz-KE-bpKQ", name: "Member 4", note: "Hotel upgrades" },
-    { id: "w7ejDZ8SWv8", name: "Member 5", note: "Points strategy" },
-    { id: "dQw4w9WgXcQ", name: "Member 6", note: "Lifestyle ROI" },
+  playlistId: "PLxxxxxxxxxxxxxxxx", // TODO
+  featuredVideoId: "dQw4w9WgXcQ", // TODO
+  // Optional: curate episodes here (used by Watch page)
+  episodes: [
+    {
+      id: "dQw4w9WgXcQ",
+      title: "Episode 1 — The Architecture of Excellence",
+      runtime: "24:18",
+      blurb:
+        "A cinematic portrait of discipline, legacy, and the mindset behind extraordinary achievement.",
+    },
+    {
+      id: "M7lc1UVf-VE",
+      title: "Episode 2 — Destination: Luxury",
+      runtime: "22:05",
+      blurb:
+        "An intimate look at how high performers curate their worlds—where they stay, how they move, what they value.",
+    },
+    {
+      id: "ysz5S6PUM-U",
+      title: "Episode 3 — The Vault Insight",
+      runtime: "26:41",
+      blurb: "Wisdom, strategy, and the principles that compound over time.",
+    },
   ],
-};
-
-// Stripe Payment Links (Paste your real Stripe payment link URLs here)
-// If left blank, checkout buttons will route to #/contact.
-const CHECKOUT = {
-  hotelHack: "", // e.g. "https://buy.stripe.com/xxxx"
-  fullCourse: "", // e.g. "https://buy.stripe.com/yyyy"
-};
-
-// Optional cross-property authority + community destination
-const LINKS = {
-  theStandard: "", // e.g. "https://thestandardseries.com"
-  circle: "", // optional, e.g. "https://circle.so/..."
-  discord: "", // optional, e.g. "https://discord.gg/..."
 };
 
 const NAV = [
   { key: "home", label: "Home" },
-  { key: "program", label: "Program" },
-  { key: "pricing", label: "Pricing" },
-  { key: "testimonials", label: "Testimonials" },
+  { key: "watch", label: "Watch" },
+  { key: "founding-guests", label: "Founding Guests" },
+  { key: "sponsors", label: "Sponsors" },
   { key: "about", label: "About" },
-  { key: "faq", label: "FAQ" },
-  { key: "members", label: "Members" },
-  { key: "contact", label: "Apply / Contact" },
+  { key: "contact", label: "Contact" },
 ];
 
 function cx(...classes) {
@@ -101,16 +92,14 @@ function useHashRoute() {
   return { key, param };
 }
 
-function isHttpUrl(s) {
-  return typeof s === "string" && /^https?:\/\//i.test(s.trim());
-}
-
 function PageShell({ children }) {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <BackgroundGlow />
       <TopNav />
-      <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6 lg:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-8 sm:px-6 lg:px-8">
+        {children}
+      </main>
       <Footer />
     </div>
   );
@@ -145,15 +134,7 @@ function TopNav() {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/70 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <a href="#/home" className="group flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-            <img
-              src={ASSETS.logoSrc}
-              alt={`${BRAND.name} logo`}
-              className="h-7 w-7 object-contain"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
             <Crown className="h-4 w-4 text-yellow-400" />
           </div>
           <div className="leading-tight">
@@ -178,16 +159,14 @@ function TopNav() {
             </a>
           ))}
           <a
-            href="#/pricing"
+            href="#/contact"
             className="ml-2 inline-flex items-center gap-2 rounded-2xl bg-yellow-500 px-4 py-2 text-sm font-semibold text-neutral-950 shadow-lg shadow-yellow-500/10 hover:bg-yellow-400"
           >
-            View tiers <ArrowRight className="h-4 w-4" />
+            Inquire <ArrowRight className="h-4 w-4" />
           </a>
         </nav>
 
         <button
-          type="button"
-          aria-label="Open menu"
           onClick={() => setOpen((v) => !v)}
           className="lg:hidden rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
         >
@@ -222,11 +201,11 @@ function TopNav() {
                 ))}
               </div>
               <a
-                href="#/pricing"
+                href="#/contact"
                 onClick={() => setOpen(false)}
                 className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-500 px-4 py-2 text-sm font-semibold text-neutral-950"
               >
-                View tiers <ArrowRight className="h-4 w-4" />
+                Inquire <ArrowRight className="h-4 w-4" />
               </a>
             </div>
           </motion.div>
@@ -236,11 +215,38 @@ function TopNav() {
   );
 }
 
+function Stat({ value, label }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+      <div className="text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl break-words">
+        {value}
+      </div>
+      <div className="mt-1 text-sm text-neutral-400">{label}</div>
+    </div>
+  );
+}
+
+function Pill({ icon: Icon, title, desc }) {
+  return (
+    <div className="flex gap-4 rounded-3xl border border-white/10 bg-white/5 p-5">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-yellow-500/10">
+        <Icon className="h-5 w-5 text-yellow-400" />
+      </div>
+      <div>
+        <div className="text-sm font-semibold text-white">{title}</div>
+        <div className="mt-1 text-sm text-neutral-400">{desc}</div>
+      </div>
+    </div>
+  );
+}
+
 function SectionTitle({ eyebrow, title, desc }) {
   return (
     <div className="mb-6">
       {eyebrow && (
-        <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">{eyebrow}</div>
+        <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">
+          {eyebrow}
+        </div>
       )}
       <div className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</div>
       {desc && <div className="mt-3 max-w-2xl text-neutral-300">{desc}</div>}
@@ -250,7 +256,7 @@ function SectionTitle({ eyebrow, title, desc }) {
 
 function Button({ href, onClick, variant = "primary", children }) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition whitespace-nowrap";
+    "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition";
   const styles =
     variant === "primary"
       ? "bg-yellow-500 text-neutral-950 hover:bg-yellow-400 shadow-lg shadow-yellow-500/10"
@@ -279,31 +285,6 @@ function Button({ href, onClick, variant = "primary", children }) {
   );
 }
 
-function Pill({ icon: Icon, title, desc }) {
-  return (
-    <div className="flex gap-4 rounded-3xl border border-white/10 bg-white/5 p-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-yellow-500/10">
-        <Icon className="h-5 w-5 text-yellow-400" />
-      </div>
-      <div className="min-w-0">
-        <div className="text-sm font-semibold text-white whitespace-normal break-normal">{title}</div>
-        <div className="mt-1 text-sm text-neutral-400 whitespace-normal break-normal">{desc}</div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ value, label }) {
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-      <div className="text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl whitespace-normal break-normal">
-        {value}
-      </div>
-      <div className="mt-1 text-sm text-neutral-400 whitespace-normal break-normal">{label}</div>
-    </div>
-  );
-}
-
 function YouTubeEmbed({ videoId, title }) {
   return (
     <div className="overflow-hidden rounded-3xl border border-white/10 bg-black">
@@ -311,7 +292,24 @@ function YouTubeEmbed({ videoId, title }) {
         <iframe
           className="absolute inset-0 h-full w-full"
           src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`}
-          title={title || "YouTube video"}
+          title={title || "YouTube video player"}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
+}
+
+function YouTubePlaylistEmbed({ playlistId }) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-white/10 bg-black">
+      <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}&rel=0&modestbranding=1&playsinline=1`}
+          title="YouTube playlist player"
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -328,168 +326,86 @@ function YouTubeEmbed({ videoId, title }) {
 function Home() {
   return (
     <div className="space-y-12">
-      {/* HERO */}
       <section className="grid items-center gap-10 lg:grid-cols-2">
         <div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-neutral-300">
-            <Shield className="h-4 w-4 text-yellow-400" /> Real execution. Discreet systems. High signal.
+            <Shield className="h-4 w-4 text-yellow-400" /> Brand‑safe, approval‑first production
           </div>
-
           <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">
-            Live the five star lifestyle without paying five star prices.
+            A cinematic portrait series featuring members of the Rolls‑Royce Whispers community.
           </h1>
-
           <p className="mt-4 max-w-xl text-neutral-300">
-            Upgrade into first class, suites, and top tier experiences for less.
-          </p>
-          <p className="mt-2 max-w-xl text-neutral-300">
-            A premium, Netflix style masterclass that teaches how access works. Hotels, flights, points, private aviation pathways,
-            elite rentals, luxury sourcing, and business leverage.
-          </p>
-          <p className="mt-2 max-w-xl text-sm text-neutral-400">
-            Most members see their first tangible win within their first booking.
-          </p>
-          <p className="mt-2 max-w-xl text-sm text-neutral-400">
-            Some wins are available immediately inside the portal. Others land within three to four days depending on your booking window.
-          </p>
-          <p className="mt-2 max-w-xl text-sm text-neutral-400">
-            Example: suite upgrades, first class outcomes, premium rentals, without premium pricing.
+            We don’t review cars. We document a philosophy of living—discipline, legacy, and the architecture of
+            excellence.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Button href="#/pricing">
-              <Crown className="h-4 w-4" /> View tiers
+            <Button href="#/watch">
+              <Play className="h-4 w-4" /> Watch
             </Button>
-            <Button href="#/program" variant="ghost">
-              Read the program overview <ArrowRight className="h-4 w-4" />
+            <Button href="#/founding-guests" variant="ghost">
+              <Crown className="h-4 w-4" /> Founding Guests
             </Button>
-            <Button href="#/contact" variant="ghost">
-              Concierge application <Mail className="h-4 w-4" />
+            <Button href="#/sponsors" variant="ghost">
+              <Handshake className="h-4 w-4" /> Sponsors
             </Button>
           </div>
 
-          <div className="mt-6 rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-5">
-            <div className="flex items-start gap-3">
-              <Quote className="mt-0.5 h-5 w-5 text-yellow-400" />
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-white">A clean distinction</div>
-                <div className="mt-1 text-sm text-neutral-200 whitespace-normal break-normal">
-                  The Full Course teaches the system. Concierge is separate and application only. We execute using our position and
-                  relationships. You simply approve.
-                </div>
-              </div>
-            </div>
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <Stat value="14–15" label="Episodes (Season 1 target)" />
+            <Stat value="15" label="Founding guest positions" />
+            <Stat value="Invitation‑only" label="Participation" />
           </div>
         </div>
 
         <div className="space-y-4">
-          <YouTubeEmbed videoId={YT.heroVideoId} title="Upgrade Society - Sizzle" />
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">How it works</div>
-            <div className="mt-2 text-2xl font-semibold">Learn it, or have it done for you</div>
-            <p className="mt-3 text-neutral-300">
-              Two entry points. One system. Choose the level of support that matches your time, lifestyle, and goals.
-              <span className="ml-2 text-neutral-200">Designed for people who execute.</span>
-            </p>
-          </div>
-          <div className="flex items-end justify-start lg:justify-end">
-            <Button href="#/pricing" variant="ghost">
-              Compare tiers <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-[28px] border border-white/10 bg-neutral-950/40 p-6">
-            <div className="text-sm font-semibold">Full Course</div>
-            <div className="mt-2 text-sm text-neutral-300">
-              You learn the architecture of access across hotels, flights, points, private aviation pathways, rentals, luxury sourcing,
-              and business leverage.
-            </div>
-            <div className="mt-4 flex gap-3">
-              <Button href="#/program" variant="ghost">
-                See the curriculum <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-[28px] border border-yellow-500/30 bg-yellow-500/10 p-6">
-            <div className="text-sm font-semibold text-white">Concierge</div>
-            <div className="mt-2 text-sm text-neutral-200">
-              Done for you execution. Direct access to Kris and team. We leverage our position and relationships across luxury travel,
-              sourcing, and business optimization.
-            </div>
-            <div className="mt-4 flex gap-3">
-              <Button href="#/contact">
-                Request application <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+          <YouTubeEmbed videoId={YT.featuredVideoId} title="THE STANDARD — Featured" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Pill
+              icon={Film}
+              title="Broadcast‑ready production"
+              desc="4K cinematic capture, color grading, multi‑camera interviews, original score."
+            />
+            <Pill
+              icon={Lock}
+              title="Relationship‑led partnerships"
+              desc="Carefully curated, season‑long associations."
+            />
           </div>
         </div>
       </section>
 
-      {/* WHAT YOU UNLOCK */}
-      <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">What you unlock</div>
-            <div className="mt-2 text-2xl font-semibold">Luxury outcomes, explained clearly</div>
-            <p className="mt-3 text-neutral-300">
-              This is a lifestyle ecosystem. Learn the system, then practice it in the real world.
-            </p>
-            <p className="mt-2 text-sm text-neutral-400">
-              Quarterly city meetups give members a reason to apply what they learn and meet serious operators.
-            </p>
-          </div>
-          <div className="flex items-end justify-start lg:justify-end">
-            <Button href="#/pricing" variant="ghost">
-              Choose your tier <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {[
-            ["Hotels and suites", "Rates, upgrades, and status strategies"],
-            ["Flights and points", "Smarter redemptions and routing"],
-            ["Private aviation pathways", "How access is structured"],
-            ["Elite rentals and exotics", "Premium outcomes with better leverage"],
-          ].map(([t, d]) => (
-            <div key={t} className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-              <div className="text-sm font-semibold whitespace-normal break-normal">{t}</div>
-              <div className="mt-1 text-sm text-neutral-400 whitespace-normal break-normal">{d}</div>
-            </div>
-          ))}
-
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5 sm:col-span-2">
-            <div className="text-sm font-semibold whitespace-normal break-normal">More inside</div>
-            <div className="mt-1 text-sm text-neutral-400 whitespace-normal break-normal">
-              Luxury sourcing, business leverage, and additional releases inside the members portal.
-            </div>
-          </div>
-        </div>
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Pill
+          icon={Sparkles}
+          title="For viewers"
+          desc="Substance over spectacle—what excellence looks like in practice, from those who live it."
+        />
+        <Pill
+          icon={Crown}
+          title="For Founding Guests"
+          desc="A permanent, cinematic legacy piece—crafted with discretion, input, and premium distribution."
+        />
+        <Pill
+          icon={Handshake}
+          title="For Sponsors"
+          desc="Select, category‑aligned partnerships structured privately and with long‑term fit in mind."
+        />
       </section>
 
-      {/* GUARANTEE */}
       <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">Guarantee</div>
-            <div className="mt-2 text-2xl font-semibold">30 Day Action Guarantee</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-yellow-400">Positioning</div>
+            <div className="mt-2 text-2xl font-semibold">The gap in luxury content</div>
             <p className="mt-3 text-neutral-300">
-              Complete the 7 Day Quick Wins Challenge and implement at least 3 strategies. If you do not see meaningful savings or value within
-              30 days, we will provide 1 on 1 coaching to troubleshoot and optimize your approach.
+              Most automotive media focuses on mechanics and features. THE STANDARD focuses on the mindset and
+              lifestyle behind ownership—why people build what they build, and how they choose to live.
             </p>
           </div>
           <div className="flex items-end justify-start lg:justify-end">
-            <Button href="#/pricing" variant="ghost">
-              View tiers <ArrowRight className="h-4 w-4" />
+            <Button href="#/about" variant="ghost">
+              Read the story <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -498,70 +414,159 @@ function Home() {
   );
 }
 
-function Program() {
+function Watch() {
+  const [selected, setSelected] = useState(YT.episodes[0]?.id || YT.featuredVideoId);
+  const selectedMeta = useMemo(
+    () => YT.episodes.find((e) => e.id === selected) || null,
+    [selected]
+  );
+
+  return (
+    <div className="space-y-8">
+      <SectionTitle
+        eyebrow="Watch"
+        title="Episodes on YouTube"
+        desc="Stream full episodes here. Embeds use youtube‑nocookie.com."
+      />
+
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <YouTubeEmbed videoId={selected} title={selectedMeta?.title || "Episode"} />
+          <div className="mt-4 rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-sm font-semibold text-white">{selectedMeta?.title || "Featured"}</div>
+                <div className="mt-1 text-sm text-neutral-400">{selectedMeta?.runtime || ""}</div>
+                <div className="mt-3 text-sm text-neutral-300">{selectedMeta?.blurb || ""}</div>
+              </div>
+              <Button href={`https://www.youtube.com/watch?v=${selected}`} variant="ghost">
+                Open on YouTube <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-sm font-semibold">All Episodes</div>
+            <div className="mt-3 space-y-2">
+              {YT.episodes.map((ep) => (
+                <button
+                  key={ep.id}
+                  onClick={() => setSelected(ep.id)}
+                  className={cx(
+                    "w-full rounded-2xl border px-4 py-3 text-left transition",
+                    ep.id === selected
+                      ? "border-yellow-500/40 bg-yellow-500/10"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-white">{ep.title}</div>
+                      <div className="mt-1 text-xs text-neutral-400">{ep.runtime}</div>
+                    </div>
+                    <Play className={cx("h-4 w-4", ep.id === selected ? "text-yellow-400" : "text-neutral-400")} />
+                  </div>
+                  <div className="mt-2 line-clamp-2 text-sm text-neutral-300">{ep.blurb}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <div className="text-xs text-neutral-400">Prefer a playlist view?</div>
+              <div className="mt-2">
+                <Button href={`https://www.youtube.com/playlist?list=${YT.playlistId}`} variant="outline">
+                  Open playlist <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SectionTitle eyebrow="Playlist" title="Watch the full season" />
+      <YouTubePlaylistEmbed playlistId={YT.playlistId} />
+    </div>
+  );
+}
+
+function FoundingGuests() {
   return (
     <div className="space-y-10">
       <SectionTitle
-        eyebrow="Program"
-        title="The architecture of access, organized and repeatable"
-        desc="This is not motivation. It is a playbook of outcomes, systems, and leverage that compound over time."
+        eyebrow="Founding Guests"
+        title="Your story. Your legacy."
+        desc="A premium portrait experience for select principals—crafted as a permanent record of how you built your life."
       />
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <Pill icon={Shield} title="Upgrade mindset" desc="Outcome first. Status stacking. Flex windows. Track everything." />
+        <Pill
+          icon={Film}
+          title="Cinematic profile"
+          desc="A dedicated profile segment with professional filming, editing, and color grading—built to premium standards."
+        />
         <Pill
           icon={Sparkles}
-          title="Quick wins"
-          desc="Start winning today. Loyalty ecosystems, status matches, and clean leverage."
+          title="Full content suite"
+          desc="Lifestyle stills, supporting footage, and a digital press kit—usable for PR and personal archives."
         />
-        <Pill icon={Film} title="Docu style teaching" desc="High production delivery designed to hold attention." />
+        <Pill
+          icon={Shield}
+          title="Discreet and collaborative"
+          desc="A curated production day, edit consultation, and a private premiere invitation." 
+        />
       </section>
 
       <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="text-2xl font-semibold">What is inside (high level)</div>
+            <div className="text-2xl font-semibold">The production experience</div>
             <p className="mt-3 text-neutral-300">
-              Hotels. Flights. Points strategy. Private aviation pathways. Elite rentals. Fashion sourcing. Business
-              credit and funding strategy. Tax optimization frameworks. Additional releases inside the members portal.
+              Filming is designed as an experience: pre‑production consultation, a focused shoot window, and a
+              collaborative edit process to preserve discretion and accuracy.
             </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {[
-                ["Hotels", "Suite upgrades, status strategies, and rate leverage"],
-                ["Flights + Points", "Business-class outcomes with smarter redemptions"],
-                ["Private Aviation", "Private aviation pathways"],
-                ["Elite Rentals", "Pay for economy, drive premium"],
-                ["Fashion", "Luxury sourcing pathways"],
-                ["Business Leverage", "Credit + funding frameworks to move faster"],
+                ["Arrival", "A composed, cinematic entrance"],
+                ["Setting", "Five‑star venue or private location"],
+                ["Interview", "Your story—vision, journey, philosophy"],
+                ["Craft", "Cinematic B‑roll and portrait moments"],
+                ["Review", "Collaborative approval‑first workflow"],
+                ["Premiere", "Private screening invitation"],
               ].map(([t, d]) => (
                 <div key={t} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="text-sm font-semibold whitespace-normal break-normal">{t}</div>
-                  <div className="mt-1 text-sm text-neutral-400 whitespace-normal break-normal">{d}</div>
+                  <div className="text-sm font-semibold">{t}</div>
+                  <div className="mt-1 text-sm text-neutral-400">{d}</div>
                 </div>
               ))}
             </div>
           </div>
-
           <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-            <div className="text-sm font-semibold">Designed for</div>
-            <div className="mt-3 space-y-2 text-sm text-neutral-300">
-              {["Entrepreneurs who value time", "Professionals who travel", "Principals building presence", "Anyone ready to execute"].map(
-                (x) => (
-                  <div key={x} className="flex gap-2">
-                    <Check className="mt-0.5 h-4 w-4 text-yellow-400" />
-                    <span className="whitespace-normal break-normal">{x}</span>
-                  </div>
-                )
-              )}
-            </div>
+            <div className="text-sm font-semibold">Next steps</div>
+            <ol className="mt-3 space-y-2 text-sm text-neutral-300">
+              <li className="flex gap-2">
+                <span className="text-yellow-400">1.</span> Submit an inquiry
+              </li>
+              <li className="flex gap-2">
+                <span className="text-yellow-400">2.</span> Brief conversation
+              </li>
+              <li className="flex gap-2">
+                <span className="text-yellow-400">3.</span> Schedule filming
+              </li>
+            </ol>
             <div className="mt-5 flex flex-col gap-2">
-              <Button href="#/pricing">
-                See pricing <ArrowRight className="h-4 w-4" />
+              <Button href="#/contact">
+                Request the guest brief <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button href="#/faq" variant="ghost">
-                Read FAQs
+              <Button
+                href={`mailto:${BRAND.contactEmail}?subject=Founding%20Guest%20Inquiry%20—%20THE%20STANDARD`}
+                variant="ghost"
+              >
+                Email <Mail className="h-4 w-4" />
               </Button>
             </div>
+            <div className="mt-4 text-xs text-neutral-400">Participation is invitation‑only.</div>
           </div>
         </div>
       </section>
@@ -569,91 +574,79 @@ function Program() {
   );
 }
 
-function Pricing() {
-  const hotelHref = isHttpUrl(CHECKOUT.hotelHack) ? CHECKOUT.hotelHack.trim() : "#/contact";
-  const fullHref = isHttpUrl(CHECKOUT.fullCourse) ? CHECKOUT.fullCourse.trim() : "#/contact";
-
+function Sponsors() {
   return (
     <div className="space-y-10">
-      <SectionTitle eyebrow="Pricing" title="Choose your level of access" desc="Learn the system, or have it executed for you." />
+      <SectionTitle
+        eyebrow="Sponsors"
+        title="Select partnerships, discreetly structured"
+        desc="THE STANDARD partners with a small number of category‑aligned institutions each season. Participation is by qualification and designed to preserve trust, discretion, and long‑term relationships."
+      />
 
       <section className="grid gap-4 lg:grid-cols-3">
         <PricingCard
-          title="Hotel Hack Only"
-          price="$599"
-          subtitle="Hotels only. Fast ROI."
-          bullets={[
-            "Hotel strategy module",
-            "Rate and status frameworks",
-            "Quick wins checklist",
-            "Digital education. Delivered immediately. Final sale.",
-          ]}
-          cta={{ label: isHttpUrl(CHECKOUT.hotelHack) ? "Checkout" : "Enroll", href: hotelHref }}
+          title="Category Lock"
+          price="$10,000"
+          subtitle="30‑day exclusive hold"
+          bullets={["Category exclusivity", "Seasonal alignment", "Private collaboration", "Details shared by request"]}
+          cta={{ label: "Request brief", href: "#/contact" }}
         />
-
         <PricingCard
-          title="Full Course"
-          price="$5,000"
-          subtitle="Full program and members portal. Founder cohort: limited allocation. Details at checkout."
+          title="Episode Participation"
+          price="$65,000"
+          subtitle="Per episode"
+          bullets={["Category exclusivity", "Seasonal alignment", "Private collaboration", "Details shared by request"]}
           highlight
-          bullets={[
-            "Full masterclass (all modules)",
-            "Members portal and private community",
-            "Education across hotels, flights, private aviation pathways, exotics, sourcing, and funding",
-            "Access frameworks built from real concierge execution",
-          ]}
-          cta={{ label: isHttpUrl(CHECKOUT.fullCourse) ? "Checkout" : "Apply / Buy", href: fullHref }}
+          cta={{ label: "Request brief", href: "#/contact" }}
         />
-
         <PricingCard
-          title="Concierge, Done For You"
-          price="$25,000"
-          subtitle="Application only. No refunds."
-          bullets={["Done for you execution", "Direct line to Kris and team, 24/7", "Private strategy sessions", "Priority scheduling"]}
-          cta={{ label: "Request application", href: "#/contact" }}
+          title="Season / Premier"
+          price="$325K – $650K"
+          subtitle="Full‑season partnership"
+          bullets={["Category exclusivity", "Seasonal alignment", "Private collaboration", "Details shared by request"]}
+          cta={{ label: "Request brief", href: "#/contact" }}
         />
       </section>
 
       <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="text-2xl font-semibold">Why the system works</div>
+            <div className="text-2xl font-semibold">How partnerships are approached</div>
             <p className="mt-3 text-neutral-300">
-              The Full Course teaches a repeatable framework for luxury outcomes across hotels, flights, points, private aviation pathways,
-              elite rentals, luxury sourcing, and business leverage. Concierge is a separate, application only service where we execute on your
-              behalf using our position and relationships. You simply approve.
+              Sponsorship is intentionally limited. Each partnership is structured privately to align values,
+              category relevance, and long‑term fit. Operational details are never public and are discussed only
+              after mutual interest is established.
             </p>
-            <div className="mt-4 text-sm text-neutral-300">Clear education in the course. Clean execution in Concierge.</div>
           </div>
-
           <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-            <div className="text-sm font-semibold">Clear distinction</div>
-            <div className="mt-3 space-y-2 text-sm text-neutral-300">
-              <div className="flex gap-2">
-                <Check className="mt-0.5 h-4 w-4 text-yellow-400" />
-                <span className="whitespace-normal break-normal">Full Course teaches you the system and how access works.</span>
-              </div>
-              <div className="flex gap-2">
-                <Check className="mt-0.5 h-4 w-4 text-yellow-400" />
-                <span className="whitespace-normal break-normal">Concierge executes using our position and relationships. You simply approve.</span>
-              </div>
-            </div>
-            <div className="mt-5">
-              <Button href="#/contact" variant="ghost">
-                Ask a question <Mail className="h-4 w-4" />
+            <div className="text-sm font-semibold">Inquiry process</div>
+            <ol className="mt-3 space-y-2 text-sm text-neutral-300">
+              <li className="flex gap-2"><span className="text-yellow-400">1.</span> Submit an inquiry</li>
+              <li className="flex gap-2"><span className="text-yellow-400">2.</span> Qualification conversation</li>
+              <li className="flex gap-2"><span className="text-yellow-400">3.</span> Private sponsor brief</li>
+            </ol>
+            <div className="mt-5 flex flex-col gap-2">
+              <Button href="#/contact">Request sponsor brief <ArrowRight className="h-4 w-4" /></Button>
+              <Button
+                href={`mailto:${BRAND.contactEmail}?subject=Confidential%20Sponsor%20Inquiry%20—%20THE%20STANDARD`}
+                variant="ghost"
+              >
+                Contact partnerships <Mail className="h-4 w-4" />
               </Button>
             </div>
+            <div className="mt-4 text-xs text-neutral-400">All discussions are confidential and non‑obligatory.</div>
           </div>
         </div>
-      </section>
-
-      <section className="text-xs text-neutral-500">
-        Full Course includes a 30 Day Action Guarantee. Concierge is application only and non refundable. Digital education is delivered
-        immediately after purchase and is considered final.
       </section>
     </div>
   );
 }
+
+const STRIPE_LINKS = {
+  hotel: "https://buy.stripe.com/test_599",
+  full: "https://buy.stripe.com/test_5000",
+  concierge: "mailto:concierge@theupgradesociety.com",
+};
 
 function PricingCard({ title, price, subtitle, bullets, cta, highlight }) {
   return (
@@ -664,92 +657,30 @@ function PricingCard({ title, price, subtitle, bullets, cta, highlight }) {
       )}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="text-sm font-semibold whitespace-normal break-normal">{title}</div>
-          <div className="mt-1 text-xs text-neutral-400 whitespace-normal break-normal">{subtitle}</div>
+        <div>
+          <div className="text-sm font-semibold">{title}</div>
+          <div className="mt-1 text-xs text-neutral-400">{subtitle}</div>
         </div>
         {highlight && (
-          <span className="rounded-2xl bg-yellow-500 px-3 py-1 text-xs font-semibold text-neutral-950 whitespace-nowrap">
-            Best value
+          <span className="rounded-2xl bg-yellow-500 px-3 py-1 text-xs font-semibold text-neutral-950">
+            Recommended
           </span>
         )}
       </div>
-      <div className="mt-5 text-3xl font-semibold tracking-tight whitespace-nowrap">{price}</div>
+      <div className="mt-5 text-3xl font-semibold tracking-tight">{price}</div>
       <ul className="mt-4 space-y-2 text-sm text-neutral-300">
         {bullets.map((b, idx) => (
           <li key={`${b}-${idx}`} className="flex gap-2">
-            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-400 shrink-0" />
-            <span className="whitespace-normal break-normal">{b}</span>
+            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-yellow-400" />
+            <span>{b}</span>
           </li>
         ))}
       </ul>
       <div className="mt-6">
-        <Button href={cta.href}>
+        <Button href={cta.href.startsWith('stripe') ? cta.href : cta.href}>
           {cta.label} <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-    </div>
-  );
-}
-
-function Testimonials() {
-  return (
-    <div className="space-y-10">
-      <SectionTitle
-        eyebrow="Testimonials"
-        title="Proof, not promises"
-        desc="Embed 6 video testimonials here. Replace the placeholder IDs with real member videos."
-      />
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        {YT.testimonials.map((t) => (
-          <div key={t.id} className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-            <div className="text-sm font-semibold text-white whitespace-normal break-normal">{t.name}</div>
-            <div className="mt-1 text-xs text-neutral-400 whitespace-normal break-normal">{t.note}</div>
-            <div className="mt-4">
-              <YouTubeEmbed videoId={t.id} title={`Testimonial — ${t.name}`} />
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <div className="text-2xl font-semibold">Member wins (example copy)</div>
-            <div className="mt-3 space-y-3 text-sm text-neutral-300">
-              <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-                <div className="flex items-start gap-3">
-                  <Quote className="mt-0.5 h-5 w-5 text-yellow-400" />
-                  <div>
-                    <div className="font-semibold">“This course paid for itself in one booking.”</div>
-                    <div className="mt-1 text-neutral-300">Stayed in an $800/night suite for a fraction using the hotel strategy.</div>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-                <div className="flex items-start gap-3">
-                  <Quote className="mt-0.5 h-5 w-5 text-yellow-400" />
-                  <div>
-                    <div className="font-semibold">“Status stacking changed my travel life.”</div>
-                    <div className="mt-1 text-neutral-300">Upgraded rental status across brands and started consistently driving premium.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-6">
-            <div className="text-sm font-semibold">Want your result featured?</div>
-            <p className="mt-2 text-sm text-neutral-400">After your first win, record a short clip and submit it. Real proof compounds trust.</p>
-            <div className="mt-5 flex gap-3">
-              <Button href="#/contact" variant="ghost">
-                Submit a testimonial <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
@@ -759,176 +690,74 @@ function About() {
     <div className="space-y-10">
       <SectionTitle
         eyebrow="About"
-        title="Presented by Kris Buban"
-        desc="Luxury lifestyle strategist and educator. Founder, More4LessMotors LLC and The Upgrade Society."
+        title="A documentary series worthy of the marque"
+        desc="THE STANDARD is built around premium storytelling, brand protection, and an editorial standard of discretion."
       />
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/40">
-              <img
-                src={ASSETS.aboutPhotoSrc}
-                alt="Kris Buban"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
-              />
-            </div>
-            <div>
-              <div className="text-lg font-semibold">{BRAND.presenter}</div>
-              <div className="text-sm text-neutral-400">{BRAND.role}</div>
-            </div>
-          </div>
-
-          <p className="mt-5 text-sm text-neutral-300">
-            Built from real world execution. Private concierge work, complex itineraries, and sourcing for clients who value time, discretion, and outcomes over discounts.
-            <span className="ml-1">Built from real concierge execution for clients spending six and seven figures annually.</span>
-          </p>
-
-          <div className="mt-5 rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-            <div className="flex items-start gap-3">
-              <Quote className="mt-0.5 h-5 w-5 text-yellow-400" />
-              <div className="text-sm text-neutral-300">“Luxury isn’t expensive—ignorance is.”</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
-          <div className="text-sm font-semibold">What makes this different</div>
-          <div className="mt-3 space-y-3 text-sm text-neutral-300">
-            <div className="flex gap-2"><span className="text-yellow-400">•</span> Built from live concierge execution—not theory</div>
-            <div className="flex gap-2"><span className="text-yellow-400">•</span> Systems used for real travel, sourcing, and deal flow</div>
-            <div className="flex gap-2"><span className="text-yellow-400">•</span> High-production delivery designed to hold attention</div>
-            <div className="flex gap-2"><span className="text-yellow-400">•</span> A genuine access advantage: XO Reserve pathway</div>
-            <div className="flex gap-2"><span className="text-yellow-400">•</span> From the creator and host of THE STANDARD, A Rolls Royce Life</div>
-          </div>
-
-          {(LINKS.theStandard && isHttpUrl(LINKS.theStandard)) && (
-            <div className="mt-6 rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-              <div className="text-sm font-semibold">A quiet credential</div>
-              <p className="mt-2 text-sm text-neutral-300">
-                For those who prefer context: THE STANDARD is a documentary project that reflects the same taste level and restraint.
-              </p>
-              <div className="mt-4">
-                <Button href={LINKS.theStandard} variant="ghost">
-                  Visit THE STANDARD <ExternalLink className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function FAQ() {
-  return (
-    <div className="space-y-10">
-      <SectionTitle
-        eyebrow="FAQ"
-        title="Clear answers, no noise"
-        desc="Clear answers, designed to help you decide quickly and confidently."
-      />
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        <FaqCard
-          q="Is the private aviation advantage real?"
-          a="Yes. The course explains how private aviation access works and what creates truly affordable outcomes. Concierge clients benefit from our position and relationships, which can remove traditional gatekeeping such as large deposits and annual membership fees. Availability and pricing depend on route, operator, and scheduling windows."
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Pill
+          icon={Shield}
+          title="Brand protection commitment"
+          desc="Approval‑first workflow, restricted associations, and a standard of excellence in every frame."
         />
-        <FaqCard
-          q="What is the difference between Full Course and Concierge?"
-          a="Full Course teaches you the system and how access works across hotels, flights, private aviation pathways, exotics, sourcing, and funding. Concierge is application only and we execute for you with direct access to Kris and team."
+        <Pill
+          icon={Film}
+          title="Episode architecture"
+          desc="Consistent segments enable seamless storytelling and repeatable creative production." 
         />
-        <FaqCard
-          q="What does the Hotel Hack Only tier include?"
-          a="Hotels only. This tier does not include the members portal, private aviation pathways, or done for you services."
-        />
-        <FaqCard
-          q="What does application only mean for Concierge?"
-          a="Concierge is application only to protect response time and outcomes. If accepted, you receive done for you execution and direct access to Kris and the team."
-        />
-        <FaqCard
-          q="What if I don’t see results?"
-          a="Complete the 7 Day Quick Wins Challenge and implement at least 3 strategies. If you do not see meaningful savings or value within 30 days, we will provide 1 on 1 coaching to troubleshoot and optimize your approach."
-        />
-        <FaqCard
-          q="Is this legal and ethical?"
-          a="We operate within policies and laws. The course teaches frameworks and best practices, not shortcuts that risk reputations."
+        <Pill
+          icon={Sparkles}
+          title="Distribution"
+          desc="YouTube for proof‑of‑concept, with pathways to premium platform expansion and live screenings."
         />
       </section>
-    </div>
-  );
-}
-
-function FaqCard({ q, a }) {
-  return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
-      <div className="text-sm font-semibold text-white whitespace-normal break-normal">{q}</div>
-      <div className="mt-2 text-sm text-neutral-300 whitespace-normal break-normal">{a}</div>
-    </div>
-  );
-}
-
-function Members() {
-  const destination = isHttpUrl(LINKS.circle) ? LINKS.circle : isHttpUrl(LINKS.discord) ? LINKS.discord : "";
-
-  return (
-    <div className="space-y-10">
-      <SectionTitle eyebrow="Members" title="Members portal" desc="Secure access is delivered immediately after purchase." />
 
       <section className="rounded-[28px] border border-white/10 bg-white/5 p-7">
         <div className="grid gap-6 lg:grid-cols-2">
           <div>
-            <div className="text-2xl font-semibold">Access</div>
-            <p className="mt-3 text-sm text-neutral-300">
-              Immediately after checkout, you will receive an email with your private portal access details. This page confirms your entry point.
+            <div className="text-2xl font-semibold">Host & Executive Producer</div>
+            <p className="mt-3 text-neutral-300">
+              Kris Buban is a Rolls‑Royce owner and member of the Whispers community, creating from inside the community—peer to
+              the guests, not an outside reviewer.
+            </p>
+            <p className="mt-3 text-sm text-neutral-400">
+              From the creator of <a href="https://thestandardseries.com" target="_blank" rel="noreferrer" className="underline hover:text-white">THE STANDARD</a> (docu‑series).
             </p>
             <div className="mt-5 rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
-              <div className="text-sm font-semibold">Next step</div>
-              <p className="mt-2 text-sm text-neutral-300">
-                If you already have your invite, use the button below. If you do not, contact support and we will route you.
-              </p>
+              <div className="flex items-start gap-3">
+                <Quote className="mt-0.5 h-5 w-5 text-yellow-400" />
+                <div className="text-sm text-neutral-300">“We don’t review cars. We document a philosophy of living.”</div>
+              </div>
             </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {destination ? (
-                <Button href={destination}>
-                  Enter portal <LogIn className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button href="#/contact" variant="ghost">
-                  Contact support <Mail className="h-4 w-4" />
-                </Button>
-              )}
-              <Button href="#/pricing" variant="ghost">
-                View tiers <ArrowRight className="h-4 w-4" />
+          </div>
+            </div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-6">
+            <div className="text-sm font-semibold">What makes this different</div>
+            <div className="mt-3 space-y-3 text-sm text-neutral-300">
+              <div className="flex gap-2">
+                <span className="text-yellow-400">•</span> Selected guests (owners, not influencers)
+              </div>
+              <div className="flex gap-2">
+                <span className="text-yellow-400">•</span> Relationship‑led partnerships
+              </div>
+              <div className="flex gap-2">
+                <span className="text-yellow-400">•</span> Broadcast‑ready production quality
+              </div>
+              <div className="flex gap-2">
+                <span className="text-yellow-400">•</span> Discretion, approvals, and brand protection
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button href="#/watch" variant="ghost">
+                <Play className="h-4 w-4" /> Watch
+              </Button>
+              <Button href="#/contact" variant="ghost">
+                <Mail className="h-4 w-4" /> Inquire
               </Button>
             </div>
           </div>
-
-          <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-6">
-            <div className="text-sm font-semibold">Portal destination (placeholder)</div>
-            <p className="mt-2 text-sm text-neutral-400">
-              When you decide between Circle or Discord, paste the link into LINKS.circle or LINKS.discord in the code.
-            </p>
-            <div className="mt-4 space-y-2 text-sm text-neutral-300">
-              <div className="flex items-start gap-2">
-                <User className="mt-0.5 h-4 w-4 text-yellow-400" />
-                <span className="whitespace-normal break-normal">Circle: clean, branded member experience</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <User className="mt-0.5 h-4 w-4 text-yellow-400" />
-                <span className="whitespace-normal break-normal">Discord: fast chat, lightweight community</span>
-              </div>
-            </div>
-          </div>
         </div>
-      </section>
-
-      <section className="text-xs text-neutral-500">
-        If you have not received your access email within 10 minutes, check spam/junk, then contact support.
       </section>
     </div>
   );
@@ -937,29 +766,33 @@ function Members() {
 function Contact() {
   return (
     <div className="space-y-10">
-      <SectionTitle eyebrow="Apply / Contact" title="Enroll, apply, or ask a question" desc="We’ll guide you to the right entry point." />
+      <SectionTitle
+        eyebrow="Contact"
+        title="Request a brief. Schedule a call."
+        desc="Tell us whether you’re a Founding Guest, Sponsor, or Media/Viewer inquiry."
+      />
 
       <section className="grid gap-4 lg:grid-cols-3">
         <ContactCard
           icon={Crown}
-          title="Full Course"
-          desc="Apply or purchase. Ask about founder pricing rules."
-          ctaLabel="Email"
-          href={`mailto:${BRAND.email}?subject=Full%20Course%20-%20The%20Upgrade%20Society`}
+          title="Founding Guests"
+          desc="Selection‑based invitations for members of the Whispers community and aligned principals."
+          ctaLabel="Email guest team"
+          href={`mailto:${BRAND.contactEmail}?subject=Founding%20Guest%20Inquiry%20—%20THE%20STANDARD`}
         />
         <ContactCard
-          icon={Shield}
-          title="Hotel Hack Only"
-          desc="$599 module. Quick ROI if you travel."
-          ctaLabel="Email"
-          href={`mailto:${BRAND.email}?subject=Hotel%20Hack%20Only%20-%20The%20Upgrade%20Society`}
+          icon={Handshake}
+          title="Sponsors"
+          desc="Category exclusivity and limited seasonal participation."
+          ctaLabel="Email partnerships"
+          href={`mailto:${BRAND.contactEmail}?subject=Confidential%20Sponsor%20Inquiry%20—%20THE%20STANDARD`}
         />
         <ContactCard
-          icon={Ticket}
-          title="Concierge (Application-only)"
-          desc="$25,000 done-for-you. Limited roster."
-          ctaLabel="Request application"
-          href={`mailto:${BRAND.email}?subject=Concierge%20Application%20Request%20-%20The%20Upgrade%20Society`}
+          icon={Play}
+          title="Viewers / Media"
+          desc="Press, distribution inquiries, or collaborations."
+          ctaLabel="Email media"
+          href={`mailto:${BRAND.contactEmail}?subject=Media%20Inquiry%20—%20THE%20STANDARD`}
         />
       </section>
 
@@ -970,25 +803,49 @@ function Contact() {
             <div className="mt-4 space-y-3 text-sm text-neutral-300">
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-yellow-400" />
-                <a className="hover:underline" href={`mailto:${BRAND.email}`}>{BRAND.email}</a>
+                <a className="hover:underline" href={`mailto:${BRAND.contactEmail}`}>
+                  {BRAND.contactEmail}
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-yellow-400" />
+                <a className="hover:underline" href={`tel:${BRAND.contactPhone.replace(/[^0-9+]/g, "")}`}>
+                  {BRAND.contactPhone}
+                </a>
               </div>
             </div>
+
             <div className="mt-6 rounded-3xl border border-white/10 bg-neutral-950/40 p-5">
               <div className="text-sm font-semibold">Quick note</div>
               <p className="mt-2 text-sm text-neutral-300">
-                If you’re asking about private aviation, include your route, dates, and flexibility window.
+                We protect discretion. Guest details and category availability are shared on request.
               </p>
             </div>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-neutral-950/40 p-6">
             <div className="text-sm font-semibold">Lead form (optional)</div>
-            <p className="mt-2 text-sm text-neutral-400">This default form uses mailto. Later, connect a real form endpoint and swap the action.</p>
-            <form className="mt-4 space-y-3" action={`mailto:${BRAND.email}`} method="post" encType="text/plain">
+            <p className="mt-2 text-sm text-neutral-400">
+              If you want a real form submission, connect this to your backend (e.g., Webflow, Next.js API
+              route, HubSpot) and replace the mailto action.
+            </p>
+
+            <form
+              className="mt-4 space-y-3"
+              action={`mailto:${BRAND.contactEmail}`}
+              method="post"
+              encType="text/plain"
+            >
               <Field label="Name" placeholder="Full name" name="name" />
-              <Field label="Email" placeholder="you@email.com" name="email" type="email" />
-              <Field label="I’m interested in" name="type" as="select" options={["Full Course", "Hotel Hack Only", "Concierge", "Other"]} />
-              <Field label="Message" placeholder="What outcome are you trying to unlock?" name="message" as="textarea" />
+              <Field label="Company" placeholder="Company / Organization" name="company" />
+              <Field label="Email" placeholder="you@company.com" name="email" type="email" />
+              <Field
+                label="I’m reaching out as"
+                name="type"
+                as="select"
+                options={["Founding Guest", "Sponsor", "Media", "Viewer"]}
+              />
+              <Field label="Message" placeholder="What would you like to accomplish?" name="message" as="textarea" />
               <button
                 type="submit"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-yellow-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-yellow-400"
@@ -1000,7 +857,10 @@ function Contact() {
         </div>
       </section>
 
-      <section className="text-xs text-neutral-500">By contacting us, you acknowledge communications may be used to coordinate enrollment and service logistics.</section>
+      <section className="text-xs text-neutral-500">
+        By contacting us, you acknowledge that communications may be used to coordinate production logistics and
+        partnership discussions. Guest contact is shared only by explicit consent.
+      </section>
     </div>
   );
 }
@@ -1011,8 +871,8 @@ function ContactCard({ icon: Icon, title, desc, ctaLabel, href }) {
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500/10">
         <Icon className="h-5 w-5 text-yellow-400" />
       </div>
-      <div className="mt-4 text-lg font-semibold whitespace-normal break-normal">{title}</div>
-      <div className="mt-2 text-sm text-neutral-300 whitespace-normal break-normal">{desc}</div>
+      <div className="mt-4 text-lg font-semibold">{title}</div>
+      <div className="mt-2 text-sm text-neutral-300">{desc}</div>
       <div className="mt-5">
         <Button href={href}>{ctaLabel}</Button>
       </div>
@@ -1051,23 +911,22 @@ function Footer() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="font-semibold text-neutral-200">{BRAND.name}</div>
-            <div className="text-xs">{BRAND.subtitle} • {BRAND.tagline}</div>
+            <div className="text-xs">
+              {BRAND.subtitle} • {BRAND.tagline}
+            </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <a className="hover:text-white" href="#/program">Program</a>
-            <a className="hover:text-white" href="#/pricing">Pricing</a>
-            <a className="hover:text-white" href="#/testimonials">Testimonials</a>
-            <a className="hover:text-white" href="#/members">Members</a>
-            <a className="hover:text-white" href="#/contact">Apply</a>
-            {LINKS.theStandard && isHttpUrl(LINKS.theStandard) && (
-              <a className="hover:text-white" href={LINKS.theStandard} target="_blank" rel="noreferrer">
-                THE STANDARD <ExternalLink className="inline h-3 w-3" />
-              </a>
-            )}
+            <a className="hover:text-white" href="#/watch">Watch</a>
+            <a className="hover:text-white" href="#/founding-guests">Founding Guests</a>
+            <a className="hover:text-white" href="#/sponsors">Sponsors</a>
+            <a className="hover:text-white" href="#/contact">Contact</a>
+            <a className="hover:text-white" href="https://thestandardseries.com" target="_blank" rel="noreferrer">THE STANDARD</a>
           </div>
         </div>
         <div className="mt-6 text-xs text-neutral-500">
-          © {new Date().getFullYear()} {BRAND.name}. All rights reserved. Terms, policies, and disclosures should be reviewed by counsel before launch.
+          © {new Date().getFullYear()} {BRAND.name}. All rights reserved. This site is a concept build; update legal
+          and trademark language before launch. THE STANDARD is an independent documentary project and is not affiliated
+          with or endorsed by Rolls‑Royce Motor Cars.
         </div>
       </div>
     </footer>
@@ -1090,56 +949,50 @@ function NotFound() {
 // Lightweight self-tests
 // -----------------------
 function runSelfTests() {
-  // Keep this tiny; it's here to catch foot-guns when editing.
-  const knownRoutes = new Set(["home", "program", "pricing", "testimonials", "about", "faq", "members", "contact"]);
+  // These run only in environments with a console and should never crash production.
+  try {
+    const requiredKeys = NAV.map((n) => n.key);
+    const knownRoutes = new Set(["home", "watch", "founding-guests", "sponsors", "about", "contact"]);
 
-  NAV.forEach((n) => {
-    if (!knownRoutes.has(n.key)) throw new Error(`NAV route key not implemented: ${n.key}`);
-  });
+    requiredKeys.forEach((k) => {
+      if (!knownRoutes.has(k)) {
+        throw new Error(`NAV route key not implemented: ${k}`);
+      }
+    });
 
-  if (YT.testimonials.length !== 6) throw new Error("Expected exactly 6 testimonials");
-
-  [CHECKOUT.hotelHack, CHECKOUT.fullCourse].forEach((x) => {
-    if (x && x.trim().length > 0 && !isHttpUrl(x)) throw new Error("CHECKOUT links must start with http(s)://");
-  });
-
-  // Catch common broken asset paths early
-  [ASSETS.logoSrc, ASSETS.aboutPhotoSrc].forEach((p) => {
-    if (typeof p !== "string" || !p.startsWith("/")) throw new Error("ASSETS paths should start with '/'");
-  });
+    // Ensure page components exist (prevents the original Watch/FoundingGuests/Sponsors ReferenceErrors)
+    if (typeof Home !== "function") throw new Error("Home component missing");
+    if (typeof Watch !== "function") throw new Error("Watch component missing");
+    if (typeof FoundingGuests !== "function") throw new Error("FoundingGuests component missing");
+    if (typeof Sponsors !== "function") throw new Error("Sponsors component missing");
+    if (typeof About !== "function") throw new Error("About component missing");
+    if (typeof Contact !== "function") throw new Error("Contact component missing");
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("THE STANDARD self-test failed:", e);
+  }
 }
 
-export default function UpgradeSocietyWebsite() {
+export default function TheStandardWebsite() {
   const { key } = useHashRoute();
 
+  // Run once on mount
   useEffect(() => {
-    // run once on mount (client)
-    if (typeof window !== "undefined") {
-      try {
-        runSelfTests();
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
-    }
+    runSelfTests();
   }, []);
 
   const page = useMemo(() => {
     switch (key) {
       case "home":
         return <Home />;
-      case "program":
-        return <Program />;
-      case "pricing":
-        return <Pricing />;
-      case "testimonials":
-        return <Testimonials />;
+      case "watch":
+        return <Watch />;
+      case "founding-guests":
+        return <FoundingGuests />;
+      case "sponsors":
+        return <Sponsors />;
       case "about":
         return <About />;
-      case "faq":
-        return <FAQ />;
-      case "members":
-        return <Members />;
       case "contact":
         return <Contact />;
       default:
